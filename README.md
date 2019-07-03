@@ -137,9 +137,9 @@ public static void QuerySkuOnwed()
 
 //被安卓回调的方法不能使用静态方法。。。
 
-public void OnCallBackPayFailed(string msg)
+public void OnCallBackPayProcess(string msg)
 {
-	LogView.setViewText ("22OnCallBackPayFailed,msg=="+msg);
+	LogView.setViewText ("OnCallBackPayProcess,msg=="+msg);
 	SetViewLog (msg);
 }
 public void OnCallBackPaySuccess(string msg)
