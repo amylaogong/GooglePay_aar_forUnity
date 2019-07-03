@@ -138,17 +138,36 @@ public static void QuerySkuOnwed()
 //被安卓回调的方法不能使用静态方法。。。
 
 public void OnCallBackPayProcess(string msg)
+
 {
+
 	LogView.setViewText ("OnCallBackPayProcess,msg=="+msg);
+	
 	SetViewLog (msg);
+	
 }
+
+
 public void OnCallBackPaySuccess(string msg)
+
+
 {
+
+
 	LogView.setViewText ("22OnCallBackPaySuccess,msg=="+msg);
+	
+	
 	SetViewLog (msg);
+	
+	
 }
 public void OnCallBackQuerryOwnedSku(string msg)
+
 {
+
 	LogView.setViewText ("22OnCallBackQuerryOwnedSku,msg=="+msg);
+	
 	SetViewLog (msg);
+	
 }
+
