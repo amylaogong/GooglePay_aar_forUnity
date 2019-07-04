@@ -11,16 +11,11 @@ import android.util.Log;
 
 import com.googlepay.util.IabBroadcastReceiver;
 import com.googlepay.util.IabHelper;
-import com.googlepay.util.IabResult;
-import com.googlepay.util.Purchase;
 import com.product.init.GooglePay;
-import com.product.init.PayInterface;
+import com.sdk.test.TestLoginActivity;
+import com.unity.callback.AndroidUnityInterface;
 import com.unity3d.player.UnityPlayer;
 import com.unity3d.player.UnityPlayerActivity;
-
-import org.json.JSONObject;
-
-import java.util.ArrayList;
 
 /**
  * Example game using in-app billing version 3.
@@ -32,74 +27,6 @@ public class GooglePayActivity extends UnityPlayerActivity {
     public static GooglePay payInstance = null;
     public static int runMode = 1;// 0 正常；1测试
     private String googlePublicKey = null;
-    public static PayInterface.OnPayProcessListener payProcessListener = new PayInterface.OnPayProcessListener() {
-        @Override
-        public void onProcess(int code, IabResult result, Purchase info) {
-            JSONObject obj;
-            try {
-                obj = new JSONObject();
-                obj.put("code",code);
-
-                if(result!=null){
-                    obj.put("IabHelerCode",result.getResponse());
-                    obj.put("resultMsg",result.getMessage());
-                }
-                if(info!=null){
-                    obj.put("googleOrderId",info.getOrderId());
-                    obj.put("getSku",info.getSku());
-                    obj.put("selfOrderId",info.getDeveloperPayload());
-                }
-                AndroidCallUnity("OnCallBackPayProcess",obj.toString());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    };
-
-    public static PayInterface.OnPaySuccessListener paySuccessListener = new PayInterface.OnPaySuccessListener() {
-        @Override
-        public void onSuccess(int code, Purchase info) {
-            GooglePay.logPrint( "GooglePayActivity.java..paySuccessListener().info=="+info);
-            JSONObject obj;
-            try {
-                obj = new JSONObject();
-                obj.put("code",code);
-                if(info!=null){
-                    obj.put("googleOrderId",info.getOrderId());
-                    obj.put("getSku",info.getSku());
-                    obj.put("selfOrderId",info.getDeveloperPayload());
-                    GooglePay.logPrint( "GooglePayActivity.java..paySuccessListener().returnUnity=="+obj.toString());
-                    AndroidCallUnity("OnCallBackPaySuccess",obj.toString());
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    };
-
-    public static PayInterface.OnQuerryOwnedSkuListener querryOwnedSkuListener = new PayInterface.OnQuerryOwnedSkuListener() {
-        @Override
-        public void onQuerryOwnedSku(int code, ArrayList<String> ownedSkus) {
-            GooglePay.logPrint( "GooglePayActivity.java..querryOwnedSkuListener().code=="+code);
-            JSONObject obj;
-            try {
-                obj = new JSONObject();
-                obj.put("code",code);
-                if(ownedSkus!=null){
-                    int size = ownedSkus.size();
-                    obj.put("ownedSkuSize",size);
-                    for(int i=0;i<size;i++){
-                        obj.put("getSku_"+i,ownedSkus.get(i));
-                    }
-                    GooglePay.logPrint( "GooglePayActivity.java..querryOwnedSkuListener().returnUnity=="+obj.toString());
-                    AndroidCallUnity("OnCallBackQuerryOwnedSku",obj.toString());
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    };
-
 
 
     @Override
@@ -141,6 +68,19 @@ public class GooglePayActivity extends UnityPlayerActivity {
         if(payInstance != null){
             payInstance.querySkuOnwed();
         }
+    }
+
+    public void DoLogin(String account,String passwd)
+    {
+        TestLoginActivity.setIsShowLog(TAG,GooglePay.logSwitch);
+        GooglePay.logPrint( "00GooglePayActivity.java..DoLogin(),account=="+account);
+        GooglePay.logPrint( "00GooglePayActivity.java..DoLogin(),passwd=="+passwd);
+        TestLoginActivity.login(account,passwd);
+        AndroidUnityInterface.SetUnityCache(account,passwd);
+    }
+
+    public static void TestStaticCall(String msg){
+        GooglePay.logPrint( "GooglePayActivity.java...TestStaticCall,msg=="+msg);
     }
 
     public static void AndroidCallUnity(String method,String paramJson)
@@ -196,72 +136,4 @@ public class GooglePayActivity extends UnityPlayerActivity {
         }
     }
 
-
-    // updates UI to reflect model
-//    public void initUI() {
-//
-//        Button close = (Button)findViewById(R.id.close);
-//        close.setOnClickListener(new View.OnClickListener(){
-//            @Override
-//            public void onClick(View view){
-//                //request owned items that not consumed.
-//                logPrint("close,onClick...getHelperInstance()=="+getHelperInstance());
-//                finish();
-//            }
-//        });
-//
-//        Button queryOwned = (Button)findViewById(R.id.queryOwned);
-//        queryOwned.setOnClickListener(new View.OnClickListener(){
-//            @Override
-//            public void onClick(View view){
-//                //request owned items that not consumed.
-//                logPrint("queryOwned,onClick...getHelperInstance()=="+getHelperInstance());
-//                if(payInstance!=null){
-//                    payInstance.querySkuOnwed();
-//                }
-//            }
-//        });
-//        Button consumeOwned = findViewById(R.id.consumeOwned);
-//        consumeOwned.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                logPrint("consumeOwned,onClick...payInstance=="+payInstance);
-//                if(payInstance!=null){
-//                    payInstance.consumedNextOwnedItem();
-//                }
-//            }
-//        });
-//
-//        Button button1 = findViewById(R.id.button1);
-//        button1.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                logPrint("button1 buy item1,onClick..payInstance=="+payInstance);
-//                if(payInstance!=null){
-//                    payInstance.buyItemBySku("item_charge_1");
-//                }
-//
-//            }
-//        });
-//        Button button2 = findViewById(R.id.button2);
-//        button2.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                logPrint("button2 buy item2,onClick...payInstance=="+payInstance );
-//                if(payInstance!=null){
-//                    payInstance.buyItemBySku("item_charge_2");
-//                }
-//            }
-//        });
-//        Button button3 = findViewById(R.id.button30);
-//        button3.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                logPrint("button3 buy item30,onClick..payInstance"+payInstance );
-//                if(payInstance!=null){
-//                    payInstance.buyItemBySku("item_charge_30");
-//                }
-//            }
-//        });
-//    }
 }
