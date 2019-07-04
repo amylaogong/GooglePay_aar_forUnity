@@ -17,6 +17,9 @@ import com.unity.callback.AndroidUnityInterface;
 import com.unity3d.player.UnityPlayer;
 import com.unity3d.player.UnityPlayerActivity;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Example game using in-app billing version 3.
  */
@@ -75,8 +78,19 @@ public class GooglePayActivity extends UnityPlayerActivity {
         TestLoginActivity.setIsShowLog(TAG,GooglePay.logSwitch);
         GooglePay.logPrint( "00GooglePayActivity.java..DoLogin(),account=="+account);
         GooglePay.logPrint( "00GooglePayActivity.java..DoLogin(),passwd=="+passwd);
-        TestLoginActivity.login(account,passwd);
-        AndroidUnityInterface.SetUnityCache(account,passwd);
+
+        try {
+            JSONObject jsonResult = new JSONObject();
+            jsonResult.put("account",account);
+            jsonResult.put("passwd",passwd);
+
+            TestLoginActivity.login(AndroidUnityInterface.loginListener,jsonResult.toString());
+            AndroidUnityInterface.SetUnityCache(account,passwd);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public static void TestStaticCall(String msg){

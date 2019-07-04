@@ -1,8 +1,8 @@
-package com.product.init;
+package com.tools.listener;
 
 import java.util.ArrayList;
 
-public class PayInterface {
+public class FunctionCalledListener {
 
 
     public static int PAY_STATE_CONSUME_SUCCESS = 0;
@@ -25,4 +25,5 @@ public class PayInterface {
     public interface OnQuerryOwnedSkuListener{
         void onQuerryOwnedSku(int code, ArrayList<String> ownedSkus);
     }
+
 }

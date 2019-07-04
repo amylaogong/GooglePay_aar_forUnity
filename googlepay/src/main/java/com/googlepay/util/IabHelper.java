@@ -31,7 +31,7 @@ import android.text.format.Time;
 
 import com.android.vending.billing.IInAppBillingService;
 import com.product.init.GooglePay;
-import com.product.init.PayInterface;
+import com.tools.listener.FunctionCalledListener;
 import com.unity.callback.AndroidUnityInterface;
 
 import org.json.JSONException;
@@ -1142,7 +1142,7 @@ public class IabHelper {
             logDebug("getPurchases() purchaseDataList.size()==: " + purchaseDataList.size());
             logDebug("getPurchases() signatureList.size()==: " + signatureList.size());
 
-            AndroidUnityInterface.querryOwnedSkuListener.onQuerryOwnedSku(PayInterface.PAY_STATE_QUERRY_OWNEDSKU_SUCCESS,ownedSkus);
+            AndroidUnityInterface.querryOwnedSkuListener.onQuerryOwnedSku(FunctionCalledListener.PAY_STATE_QUERRY_OWNEDSKU_SUCCESS,ownedSkus);
 
             for (int i = 0; i < purchaseDataList.size(); ++i) {
                 String purchaseData = purchaseDataList.get(i);

@@ -11,6 +11,7 @@ import com.googlepay.util.IabHelper.IabAsyncInProgressException;
 import com.googlepay.util.IabResult;
 import com.googlepay.util.Inventory;
 import com.googlepay.util.Purchase;
+import com.tools.listener.FunctionCalledListener;
 import com.unity.callback.AndroidUnityInterface;
 
 public class GooglePay {
@@ -47,11 +48,11 @@ public class GooglePay {
 
             if(result!=null){
                 if(result.getResponse() == IabHelper.IABHELPER_USER_CANCELLED){
-                    AndroidUnityInterface.payProcessListener.onProcess(PayInterface.PAY_STATE_PROCESS_PURCHASE_CANCELLED,result,purchase);
+                    AndroidUnityInterface.payProcessListener.onProcess(FunctionCalledListener.PAY_STATE_PROCESS_PURCHASE_CANCELLED,result,purchase);
                     return ;
                 }
             }
-            AndroidUnityInterface.payProcessListener.onProcess(PayInterface.PAY_STATE_PROCESS_PURCHASE,result,purchase);
+            AndroidUnityInterface.payProcessListener.onProcess(FunctionCalledListener.PAY_STATE_PROCESS_PURCHASE,result,purchase);
 
             if(purchase==null){
                 return;
@@ -74,7 +75,7 @@ public class GooglePay {
             }
             logPrint("OnIabPurchaseFinishedListener...now will consumeAsync");
 
-            AndroidUnityInterface.payProcessListener.onProcess(PayInterface.PAY_STATE_PROCESS_PURCHASE_DONE,result,purchase);
+            AndroidUnityInterface.payProcessListener.onProcess(FunctionCalledListener.PAY_STATE_PROCESS_PURCHASE_DONE,result,purchase);
 
             try {
                 mHelper.consumeAsync(purchase, mConsumeFinishedListener);
@@ -99,7 +100,7 @@ public class GooglePay {
             logPrint("onConsumeFinished...result.isSuccess()=="+result.isSuccess());
 
 
-            AndroidUnityInterface.payProcessListener.onProcess(PayInterface.PAY_STATE_PROCESS_CONSUME,result,purchase);
+            AndroidUnityInterface.payProcessListener.onProcess(FunctionCalledListener.PAY_STATE_PROCESS_CONSUME,result,purchase);
 
             // if we were disposed of in the meantime, quit.
             if (mHelper == null) return;
@@ -112,7 +113,7 @@ public class GooglePay {
                 // game world's logic, which in our case means filling the gas tank a bit
                 logPrint("onConsumeFinished...successful..then we can give the item to player!!!");
 
-                AndroidUnityInterface.paySuccessListener.onSuccess(PayInterface.PAY_STATE_CONSUME_SUCCESS,purchase);
+                AndroidUnityInterface.paySuccessListener.onSuccess(FunctionCalledListener.PAY_STATE_CONSUME_SUCCESS,purchase);
 
 
                 //alert("onConsumeFinished...successful ");

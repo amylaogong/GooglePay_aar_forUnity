@@ -4,7 +4,8 @@ import com.example.helloworld.GooglePayActivity;
 import com.googlepay.util.IabResult;
 import com.googlepay.util.Purchase;
 import com.product.init.GooglePay;
-import com.product.init.PayInterface;
+import com.sdk.test.SdkListener;
+import com.tools.listener.FunctionCalledListener;
 
 import org.json.JSONObject;
 
@@ -31,7 +32,7 @@ public class AndroidUnityInterface {
         }
     }
 
-    public static PayInterface.OnPayProcessListener payProcessListener = new PayInterface.OnPayProcessListener() {
+    public static FunctionCalledListener.OnPayProcessListener payProcessListener = new FunctionCalledListener.OnPayProcessListener() {
         @Override
         public void onProcess(int code, IabResult result, Purchase info) {
             JSONObject obj;
@@ -56,10 +57,10 @@ public class AndroidUnityInterface {
         }
     };
 
-    public static PayInterface.OnPaySuccessListener paySuccessListener = new PayInterface.OnPaySuccessListener() {
+    public static FunctionCalledListener.OnPaySuccessListener paySuccessListener = new FunctionCalledListener.OnPaySuccessListener() {
         @Override
         public void onSuccess(int code, Purchase info) {
-            GooglePay.logPrint( "GooglePayActivity.java..paySuccessListener().info=="+info);
+            GooglePay.logPrint( "AndroidUnityInterface.java..paySuccessListener().info=="+info);
             JSONObject obj;
             try {
                 obj = new JSONObject();
@@ -69,7 +70,7 @@ public class AndroidUnityInterface {
                     obj.put("googleOrderId",info.getOrderId());
                     obj.put("getSku",info.getSku());
                     obj.put("selfOrderId",info.getDeveloperPayload());
-                    GooglePay.logPrint( "GooglePayActivity.java..paySuccessListener().returnUnity=="+obj.toString());
+                    GooglePay.logPrint( "AndroidUnityInterface.java..paySuccessListener().returnUnity=="+obj.toString());
                     NotifyUnityWithJson(obj.toString());
                 }
             } catch (Exception e) {
@@ -78,10 +79,10 @@ public class AndroidUnityInterface {
         }
     };
 
-    public static PayInterface.OnQuerryOwnedSkuListener querryOwnedSkuListener = new PayInterface.OnQuerryOwnedSkuListener() {
+    public static FunctionCalledListener.OnQuerryOwnedSkuListener querryOwnedSkuListener = new FunctionCalledListener.OnQuerryOwnedSkuListener() {
         @Override
         public void onQuerryOwnedSku(int code, ArrayList<String> ownedSkus) {
-            GooglePay.logPrint( "GooglePayActivity.java..querryOwnedSkuListener().code=="+code);
+            GooglePay.logPrint( "AndroidUnityInterface.java..querryOwnedSkuListener().code=="+code);
             JSONObject obj;
             try {
                 obj = new JSONObject();
@@ -93,7 +94,7 @@ public class AndroidUnityInterface {
                     for(int i=0;i<size;i++){
                         obj.put("getSku_"+i,ownedSkus.get(i));
                     }
-                    GooglePay.logPrint( "GooglePayActivity.java..querryOwnedSkuListener().returnUnity=="+obj.toString());
+                    GooglePay.logPrint( "AndroidUnityInterface.java..querryOwnedSkuListener().returnUnity=="+obj.toString());
                     NotifyUnityWithJson(obj.toString());
                 }
             } catch (Exception e) {
@@ -101,6 +102,15 @@ public class AndroidUnityInterface {
             }
         }
     };
+
+    public static SdkListener.OnLoginListener loginListener = new SdkListener.OnLoginListener() {
+        @Override
+        public void onLoginFinished(String jsonStr) {
+            GooglePay.logPrint( "AndroidUnityInterface.java..onLoginFinished().jsonStr=="+jsonStr);
+            NotifyUnityWithJson(jsonStr);
+        }
+    };
+
 
     public static void NotifyUnityWithJson(String jsonStr){
         GooglePayActivity.AndroidCallUnity("OnNotifyWithJson",jsonStr);
