@@ -76,15 +76,17 @@ public class GooglePayActivity extends UnityPlayerActivity {
     public void DoLogin(String account,String passwd)
     {
         TestLoginActivity.setIsShowLog(TAG,GooglePay.logSwitch);
-        GooglePay.logPrint( "00GooglePayActivity.java..DoLogin(),account=="+account);
-        GooglePay.logPrint( "00GooglePayActivity.java..DoLogin(),passwd=="+passwd);
+        GooglePay.logPrint( "00GooglePayActivity.java..DoLogin()");
 
         try {
             JSONObject jsonResult = new JSONObject();
             jsonResult.put("account",account);
             jsonResult.put("passwd",passwd);
 
-            TestLoginActivity.login(AndroidUnityInterface.loginListener,jsonResult.toString());
+            TestLoginActivity.setLoginListener(AndroidUnityInterface.loginListener);
+            Intent intent = new Intent(this,TestLoginActivity.class);
+            this.startActivity(intent);
+
             AndroidUnityInterface.SetUnityCache(account,passwd);
 
         } catch (JSONException e) {
