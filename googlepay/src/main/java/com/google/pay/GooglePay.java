@@ -165,10 +165,13 @@ public class GooglePay {
                 if (!result.isSuccess()) {
                     // Oh noes, there was a problem.
                     logPrint("onIabSetupFinished,Problem setting up in-app billing: " + result);
+                    AndroidUnityInterface.payProcessListener.onProcess(FunctionCalledListener.PAY_STATE_SERVICE_INIT_FAILED,result,null);
                     return;
                 }
                 // Have we been disposed of in the meantime? If so, quit.
-                if (mHelper == null) return;
+                if (mHelper == null) {
+                    return;
+                }
 
 //                mBroadcastReceiver = new IabBroadcastReceiver(payAct);
 //                IntentFilter broadcastFilter = new IntentFilter(IabBroadcastReceiver.ACTION);

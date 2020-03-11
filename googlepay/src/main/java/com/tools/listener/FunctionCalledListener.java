@@ -8,6 +8,7 @@ public class FunctionCalledListener {
     public static int PAY_STATE_CONSUME_SUCCESS = 0;
     public static int PAY_STATE_QUERRY_OWNEDSKU_SUCCESS = 0;
 
+    public static int PAY_STATE_SERVICE_INIT_FAILED = 1998;
     public static int PAY_STATE_SERVICE_READY = 1999;
     public static int PAY_STATE_PROCESS_PURCHASE = 2000;//purchased
     public static int PAY_STATE_PROCESS_PURCHASE_CANCELLED = 2001;//
