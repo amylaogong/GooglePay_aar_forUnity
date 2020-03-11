@@ -1,195 +1,209 @@
+/*
+ * Copyright 2012 Google Inc. All Rights Reserved.
+ *
+ */
+
 package com.example.helloworld;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.google.login.GoogleSignInHelper;
+import com.google.pay.GooglePay;
+import com.googlepay.util.IabBroadcastReceiver;
+import com.googlepay.util.IabHelper;
+import com.sdk.test.TestLoginActivity;
+import com.unity.callback.AndroidUnityInterface;
 import com.unity3d.player.UnityPlayer;
 import com.unity3d.player.UnityPlayerActivity;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-
+/**
+ * Example game using in-app billing version 3.
+ */
 public class MainActivity extends UnityPlayerActivity {
 
-    boolean isPrint = true;
-//    int count = 0;
-//    EditText ipport;
-//    TextView logControl;
-//    static FuncTcpClient masterClient;//连接的主机服务器
-//    static FuncTcpClient localClient;//连接的设备服务器
-//    public static String localServerIp = null;
-//    public static int masterServerPort = 30099;
-//    public static int localServerPort = 30066;
-//
-//    private LocalServer myServer;
-//    private UdpHelper udphelper;
-    public static Context cxt;
+    public static final String TAG = "123GooglePay";
+    IabBroadcastReceiver mBroadcastReceiver = null;
+    public static GooglePay payInstance = null;
+    public static int runMode = 1;// 0 正常；1测试
+    private String googlePublicKey = null;
+
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        cxt = this;
+        GooglePay.logPrint( "MainActivity.java..onCreate().runMode=="+runMode);
+    }
 
-//        setContentView(R.layout.activity_main);
-//        initUI();
-
-        StartActivityGooglePay();
-//        new Thread(){
-//            @Override
-//            public void run() {
-//                while (true){
-//                    try {
-//                        count++;
-//                        System.out.println("MainActivity,count=="+count);
-//                        Thread.sleep(5000);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }
-//        }.start();
-
+    //被unity调用的方法不能使用静态的
+    public void SetRunMode(int mode){
+        runMode = mode;
+        if(runMode == 1){
+            GooglePay.logSwitch = true;
+        }else if(runMode == 0){
+            GooglePay.logSwitch = false;
+        }
+        GooglePay.logPrint( "MainActivity.java..SetRunMode().runMode=="+runMode);
     }
 
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        finish();
+    public void SDKLogin(int mode,String params){
+        if(mode == 1){//google login
+            String googleKey = params;
+            googleLogin(googleKey);
+        }
     }
 
-    public void StartActivityGooglePay()
-    {
-        Intent intent = new Intent(cxt,GooglePayActivity.class);
-        //intent.putExtra("name", name);
-        this.startActivity(intent);
-    }
-
-    public void ChargeItem(String productID)
-    {
-        Log.d(GooglePayActivity.TAG, "MainActivity.java..ChargeItem().GooglePayActivity.payInstance=="+GooglePayActivity.payInstance);
-        if(GooglePayActivity.payInstance != null){
-            Log.d(GooglePayActivity.TAG, "MainActivity.java..ChargeItem()..productID=="+productID);
-            GooglePayActivity.payInstance.buyItemBySku(productID);
+    public void  SDKLogout(int mode){
+        if(mode == 1){//google
+            googleLogout();
         }
     }
 
 
-    public void UnityCallAndroid(String msg)
+    public void InitPay(String googleKey)
     {
-        Log.d(GooglePayActivity.TAG, "MainActivity.java...UnityCallAndroid,msg=="+msg);
-        AndroidCallUnity(msg);
-//        return "Android return : " + msg;
+        GooglePay.logPrint( "MainActivity.java..InitPay().googleKey=="+googleKey);
+        googlePublicKey = googleKey;
+        getGooglePayInstance();
+        GooglePay.logPrint( "MainActivity.java..InitPay().payInstance=="+payInstance);
     }
-    // Android call Unity
-    public void AndroidCallUnity(String msg)
+
+    public void ChargeByProductID(String productID)
     {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        String dateStr = format.format(new Date());
+        GooglePay.logPrint( "MainActivity.java..ChargeByProductID().payInstance=="+payInstance);
+        if(getGooglePayInstance() != null){
+            GooglePay.logPrint( "MainActivity.java..ChargeByProductID()..productID=="+productID);
+            payInstance.buyItemBySku(productID);
+        }
+    }
 
-        Log.d(GooglePayActivity.TAG, "MainActivity.java...AndroidCallUnity,msg=="+msg);
-        //com.unity3d.player.UnityPlayer.UnitySendMessage("UnityAndroidCommunicationObj", "AndroidCallUnityCB", msg);
-        UnityPlayer.UnitySendMessage("MainCamera","GetDate","from Android..."+dateStr+",msg=="+msg);//再回调Unity的函数
+    public void QuerySkuOnwed()
+    {
+        GooglePay.logPrint( "00MainActivity.java..QuerySkuOnwed()");
+        if(payInstance != null){
+            payInstance.querySkuOnwed();
+        }
+    }
+
+    public void DoLogin(String account,String passwd)
+    {
+        TestLoginActivity.setIsShowLog(TAG,GooglePay.logSwitch);
+        GooglePay.logPrint( "00MainActivity.java..DoLogin()");
+
+        try {
+            JSONObject jsonResult = new JSONObject();
+            jsonResult.put("account",account);
+            jsonResult.put("passwd",passwd);
+
+            TestLoginActivity.setLoginListener(AndroidUnityInterface.loginListener);
+            Intent intent = new Intent(this,TestLoginActivity.class);
+            this.startActivity(intent);
+
+            AndroidUnityInterface.SetUnityCache(account,passwd);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static void TestStaticCall(String msg){
+        GooglePay.logPrint( "MainActivity.java...from_unity_TestStaticCall,msg=="+msg);
+    }
+
+    public static void AndroidCallUnity(String method,String paramJson)
+    {
+        GooglePay.logPrint( "MainActivity.java...AndroidCallUnity,method=="+method);
+        GooglePay.logPrint( "MainActivity.java...AndroidCallUnity,paramJson=="+paramJson);
+        UnityPlayer.UnitySendMessage("AndroidInterface",method,paramJson);//再回调Unity的函数
     }
 
 
-//    public void initUI(){
-//        Button fab = findViewById(R.id.paybtn);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                System.out.println("PayActivity,onClick,view=="+view);
-//                System.out.println("open PayActivity,count=="+count);
-//                Intent intent = new Intent(MainActivity.this, GooglePayActivity.class);
-//                startActivity(intent);
-//            }
-//        });
-//        ipport = findViewById(R.id.ipport);
-//        ipport.setText("10.0.2.11:30099");
-//
-//        logControl = findViewById(R.id.log);
-//
-//        Button connect = findViewById(R.id.connect);
-//        connect.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                String ip = ipport.getText().toString();
-//                System.out.println("connect begin...");
-//
-//                String serverIP = "";
-//                String ipInput = ipport.getText().toString();
-//                System.out.println("open PayActivity,ipInput=="+ipInput);
-//                String[] segs = ipInput.split(":");
-//                if(segs.length>1){
-//                    serverIP = segs[0];
-//                    masterServerPort = Integer.parseInt(segs[1]);
-//                }
-//                //myServer = new LocalServer();
-//                masterClient = new FuncTcpClient(serverIP,masterServerPort);
-//                //masterClient = new FuncTcpClient("10.0.6.22",48973);
-//                //masterClient = new FuncTcpClient("101.71.140.6",localServerPort);
-//                //masterClient = new FuncTcpClient("192.168.2.4",localServerPort);
-//                //masterClient = new FuncTcpClient("101.71.140.7",localServerPort);
-//            }
-//        });
-//
-//        Button connectudp = findViewById(R.id.connectudp);
-//        connectudp.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                boolean isServer = false;
-//                if(isServer){
-//                    WifiManager manager = (WifiManager) cxt.getSystemService(Context.WIFI_SERVICE);
-//                    udphelper = new UdpHelper(manager);
-//
-//                    ExecutorService exec = Executors.newCachedThreadPool();
-//                    exec.execute(udphelper);
-//                }else{
-//                    logControl.setText("udp send ready....");
-//                    new Thread(){
-//                        @Override
-//                        public void run() {
-//                            String sendStr = "here is android_"+android.os.Build.MODEL.trim();
-//                            UdpHelper.send(sendStr);
-//                        }
-//                    }.start();
-//                }
-//            }
-//        });
-//
-//        Button udpstart = findViewById(R.id.udpstart);
-//        udpstart.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                boolean isServer = true;
-//                if(isServer){
-//                    logControl.setText("UDPServer is running...");
-//                    WifiManager manager = (WifiManager) cxt.getSystemService(Context.WIFI_SERVICE);
-//                    udphelper = new UdpHelper(manager);
-//
-//                    ExecutorService exec = Executors.newCachedThreadPool();
-//                    exec.execute(udphelper);
-//                }
-//            }
-//        });
-//
-//    }
+    public GooglePay getGooglePayInstance(){
+        if(payInstance==null){
+            payInstance = new GooglePay(this,googlePublicKey);
+        }
+        return payInstance;
+    }
 
-    public static void connect2LocalServer(String ip){
-//        System.out.println("PayActivity,connect2LocalServer,localServerIp,localServerPort=="+localServerIp+":"+localServerPort);
-//        String[] segs = ip.split(":");
-//        if(segs.length>1){
-//            localServerIp = segs[0];
-//            localServerPort = Integer.parseInt(segs[1]);
-//        }
-//        localClient = new FuncTcpClient(localServerIp,localServerPort);
+    public IabHelper getHelperInstance(){
+        if(payInstance==null){
+            return null;
+        }
+        return payInstance.mHelper;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        GooglePay.logPrint( "MainActivity,onActivityResult(" + requestCode + "," + resultCode + "," + data);
+        if (getHelperInstance() == null) return;
+
+        // Pass on the activity result to the helper for handling
+        if (!getHelperInstance().handleActivityResult(requestCode, resultCode, data)) {
+            // not handled, so handle it ourselves (here's where you'd
+            // perform any handling of activity results not related to in-app
+            // billing...
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+        else {
+            Log.d(TAG, "MainActivity,onActivityResult handled by IABUtil.");
+        }
+    }
+
+    // We're being destroyed. It's important to dispose of the helper here!
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        // very important:
+        if (mBroadcastReceiver != null) {
+            unregisterReceiver(mBroadcastReceiver);
+        }
+        if(payInstance!=null){
+            payInstance.onDestroy();
+        }
     }
 
 
+    private void googleLogin(String googleKey){
+        GoogleSignInHelper.getInstance().setGoogleKey(googleKey);
+        GoogleSignInHelper.getInstance().checkState(this);
+        GoogleSignInHelper.getInstance().requestLogin(this, false, new GoogleSignInHelper.GoogleSignInCallback() {
 
+            @Override
+            public void onSuccess(String authCode, String uid, String name) {
+                GoogleSignInHelper.printDebug("MainActivity,googleLogin -> onSuccess():authCode = " + authCode);
+                GoogleSignInHelper.printDebug("MainActivity,googleLogin -> onSuccess():uid = " + uid);
 
+                GoogleSignInHelper.printDebug("MainActivity,googleLogin -> onSuccess():name = " + name);
+
+                GoogleSignInHelper.printDebug("MainActivity,googleLogin -> onSuccess() 222:GoogleSignInHelper.mGoogleApiClient = " + GoogleSignInHelper.mGoogleApiClient);
+                boolean isConnected = GoogleSignInHelper.mGoogleApiClient.isConnected();
+                GoogleSignInHelper.printDebug("MainActivity,googleLogin,onSuccess(),222 mGoogleApiClient.isConnected=="+isConnected);
+
+            }
+
+            @Override
+            public void onError() {
+                GoogleSignInHelper.printDebug("GoogleSignInCallback -> onError()");
+            }
+
+            @Override
+            public void onCancel() {
+                GoogleSignInHelper.printDebug("GoogleSignInCallback -> onCancel()");
+            }
+        });
+
+    }
+
+    private void googleLogout(){
+        GoogleSignInHelper.printDebug("MainActivity,googleLogin -> onSuccess():222 GoogleSignInHelper.mGoogleApiClient = " + GoogleSignInHelper.mGoogleApiClient);
+        GoogleSignInHelper.signOut();
+    }
 
 }

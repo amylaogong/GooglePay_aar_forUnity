@@ -9,6 +9,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/googlepay" />
+            <option value="$PROJECT_DIR$/runactivity" />
             <option value="$PROJECT_DIR$/sdktest" />
           </set>
         </option>

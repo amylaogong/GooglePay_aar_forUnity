@@ -30,7 +30,7 @@ import android.text.TextUtils;
 import android.text.format.Time;
 
 import com.android.vending.billing.IInAppBillingService;
-import com.product.init.GooglePay;
+import com.google.pay.GooglePay;
 import com.tools.listener.FunctionCalledListener;
 import com.unity.callback.AndroidUnityInterface;
 
@@ -741,21 +741,21 @@ public class IabHelper {
         Time time = new Time();
         time.setToNow();
         String payload = "order_"+time.format2445();
-        logDebug("queryInventoryAsync,getSkuDetails,payload=="+payload);
+        logDebug("IabHelper.java,queryInventoryAsync,getSkuDetails,payload=="+payload);
         Bundle buyIntentBundle = null;
         PendingIntent pending = null;
         try {
             buyIntentBundle = mService.getBuyIntent(3,mContext.getPackageName(),chargeSku,"inapp",payload);
             int resCode = buyIntentBundle.getInt("RESPONSE_CODE");//RESPONSE_CODE
-            logDebug("queryInventoryAsync,getBuyIntent,resCode=="+resCode);
+            logDebug("IabHelper.java,queryInventoryAsync,getBuyIntent,resCode=="+resCode);
             if(resCode==0){
                 pending = buyIntentBundle.getParcelable("BUY_INTENT");
             }
         }catch (RemoteException e){
-            logDebug("queryInventoryAsync,getSkuDetails RemoteException_error,e=="+e.toString());
+            logDebug("IabHelper.java,queryInventoryAsync,getSkuDetails RemoteException_error,e=="+e.toString());
         }
 
-        logDebug("queryInventoryAsync,getBuyIntent,pending=="+pending);
+        logDebug("IabHelper.java,queryInventoryAsync,getBuyIntent,pending=="+pending);
         return pending;
     }
 

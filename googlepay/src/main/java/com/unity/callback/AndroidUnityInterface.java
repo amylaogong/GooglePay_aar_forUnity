@@ -1,9 +1,9 @@
 package com.unity.callback;
 
-import com.example.helloworld.GooglePayActivity;
+import com.example.helloworld.MainActivity;
+import com.google.pay.GooglePay;
 import com.googlepay.util.IabResult;
 import com.googlepay.util.Purchase;
-import com.product.init.GooglePay;
 import com.sdk.test.SdkListener;
 import com.tools.listener.FunctionCalledListener;
 
@@ -49,6 +49,14 @@ public class AndroidUnityInterface {
                     obj.put("googleOrderId",info.getOrderId());
                     obj.put("getSku",info.getSku());
                     obj.put("selfOrderId",info.getDeveloperPayload());
+
+                    obj.put("getPurchaseTime",""+info.getPurchaseTime());
+                    obj.put("getItemType",info.getItemType());
+                    obj.put("getOriginalJson",info.getOriginalJson());
+                    obj.put("getPackageName",info.getPackageName());
+                    obj.put("getPurchaseState",info.getPurchaseState());
+                    obj.put("getSignature",info.getSignature());
+                    obj.put("getToken",info.getToken());
                 }
                 NotifyUnityWithJson(obj.toString());
             } catch (Exception e) {
@@ -70,6 +78,15 @@ public class AndroidUnityInterface {
                     obj.put("googleOrderId",info.getOrderId());
                     obj.put("getSku",info.getSku());
                     obj.put("selfOrderId",info.getDeveloperPayload());
+
+                    obj.put("getPurchaseTime",""+info.getPurchaseTime());
+                    obj.put("getItemType",info.getItemType());
+                    obj.put("getOriginalJson",info.getOriginalJson());
+                    obj.put("getPackageName",info.getPackageName());
+                    obj.put("getPurchaseState",info.getPurchaseState());
+                    obj.put("getSignature",info.getSignature());
+                    obj.put("getToken",info.getToken());
+
                     GooglePay.logPrint( "AndroidUnityInterface.java..paySuccessListener().returnUnity=="+obj.toString());
                     NotifyUnityWithJson(obj.toString());
                 }
@@ -113,7 +130,7 @@ public class AndroidUnityInterface {
 
 
     public static void NotifyUnityWithJson(String jsonStr){
-        GooglePayActivity.AndroidCallUnity("OnNotifyWithJson",jsonStr);
+        MainActivity.AndroidCallUnity("OnNotifyWithJson",jsonStr);
     }
 
     public static String loadJSON(String url) {

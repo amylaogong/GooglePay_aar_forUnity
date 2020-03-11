@@ -1,3 +1,5 @@
 include ':googlepay', ':sdktest'
+include ':runactivity'
+
 
 
