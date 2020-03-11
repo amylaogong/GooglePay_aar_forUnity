@@ -173,7 +173,7 @@ public class AndroidInterface : MonoBehaviour {
 	}
 
 
-	//被安卓回调的方法不能使用静态方法。。。
+	//被安卓回调的方法。。。
 	public void OnNotifyWithJson(string jsonStr)
 	{
 		//通过返回的function字段判定走相应的逻辑，
