@@ -23,6 +23,8 @@ public class GooglePay {
     public static boolean logSwitch = true;
     private boolean isPayServiceReady = false;
 
+    public static String gameOrderId = "";//游戏里自定义订单号，由服务器生成
+
     public IabHelper mHelper = null;
     // Listener that's called when we finish querying the items and subscriptions we own
     IabHelper.QueryInventoryFinishedListener mGotInventoryListener = new IabHelper.QueryInventoryFinishedListener() {//监听查询所有的产品

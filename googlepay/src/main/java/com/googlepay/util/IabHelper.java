@@ -740,7 +740,11 @@ public class IabHelper {
     public PendingIntent getPendingIntent(String chargeSku){
         Time time = new Time();
         time.setToNow();
-        String payload = "order_"+time.format2445();
+        String payload = GooglePay.gameOrderId;//"order_"+time.format2445();
+        if(payload.equals("")){
+            payload = "AS_order_"+time.format2445();
+        }
+
         logDebug("IabHelper.java,queryInventoryAsync,getSkuDetails,payload=="+payload);
         Bundle buyIntentBundle = null;
         PendingIntent pending = null;

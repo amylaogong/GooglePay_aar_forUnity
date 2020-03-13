@@ -73,11 +73,13 @@ public class MainActivity extends UnityPlayerActivity {
         GooglePay.logPrint( "MainActivity.java..InitPay().payInstance=="+payInstance);
     }
 
-    public void ChargeByProductID(String productID)
+    public void ChargeByProductID(String productID,String gameOrderID)
     {
         GooglePay.logPrint( "MainActivity.java..ChargeByProductID().payInstance=="+payInstance);
         if(getGooglePayInstance() != null){
             GooglePay.logPrint( "MainActivity.java..ChargeByProductID()..productID=="+productID);
+            GooglePay.logPrint( "MainActivity.java..ChargeByProductID()..gameOrderID=="+gameOrderID);
+            GooglePay.gameOrderId = gameOrderID;
             payInstance.buyItemBySku(productID);
         }
     }
