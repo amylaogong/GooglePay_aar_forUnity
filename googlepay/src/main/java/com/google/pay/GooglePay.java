@@ -14,6 +14,8 @@ import com.googlepay.util.Purchase;
 import com.tools.listener.FunctionCalledListener;
 import com.unity.callback.AndroidUnityInterface;
 
+import java.util.ArrayList;
+
 public class GooglePay {
     //google支付部分：
     // 声明属性The helper object
@@ -24,6 +26,7 @@ public class GooglePay {
     private boolean isPayServiceReady = false;
 
     public static String gameOrderId = "";//游戏里自定义订单号，由服务器生成
+    public static String skuJsons = "";
 
     public IabHelper mHelper = null;
     // Listener that's called when we finish querying the items and subscriptions we own
@@ -115,6 +118,11 @@ public class GooglePay {
                 // game world's logic, which in our case means filling the gas tank a bit
                 logPrint("onConsumeFinished...successful..then we can give the item to player!!!");
 
+//                String purchaseData = purchase.getOriginalJson();
+//                String signature = purchase.getSignature();
+//                boolean isVailid = com.googlepay.util.Security.verifyPurchase(base64EncodedPublicKey, purchaseData, signature);
+//                logPrint("onConsumeFinished,successful..isVailid==" + isVailid);
+
                 AndroidUnityInterface.paySuccessListener.onSuccess(FunctionCalledListener.PAY_STATE_CONSUME_SUCCESS,purchase);
 
 
@@ -135,7 +143,7 @@ public class GooglePay {
 
     //base64EncodedPublicKey是在Google开发者后台复制过来的：要集成的应用——>服务和API——>此应用的许可密钥（自己去复制）
     //"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAh+LmGYNVmHE2oQD/nLseF1n0if5evGkc7/K+fAFFTUHXKTcHpJrmexlJ+4rg2TUa5be0o21VTFipy8oBfCbrek0eIEf3vzf1LwEfunA9SRljmhoBZ41vv5IxVLl1opS7kM9vFcF3ov2PzbngP1lI9Iy/5QQXCGcVmP4ohnJMQvgCsgE0LhFlaGSPZ5hZi5vzg7hDO6wdpAg9pyYJTPc3oOyeGTPZUTgWsj8RAIQBegaSnmkOYFQvi5e17SsDiYgs3awgtWFQJEcMcko8P3BAGKuuolwDDKyMxtBqkHz+rYNeEHqApWa1DDfu5SLaYCva8qaiacCU4wteP9d19Pn7EwIDAQAB";//"MIIBIjANBgkqh******************************DAQAB";
-    private String base64EncodedPublicKey = "";
+    public static String base64EncodedPublicKey = "";
 
     public static void logPrint(String des){
         if(logSwitch){
@@ -175,23 +183,41 @@ public class GooglePay {
                     return;
                 }
 
-//                mBroadcastReceiver = new IabBroadcastReceiver(payAct);
-//                IntentFilter broadcastFilter = new IntentFilter(IabBroadcastReceiver.ACTION);
-//                registerReceiver(mBroadcastReceiver, broadcastFilter);
 
-                logPrint("Setup successful. querySkuDetailsAsync...");
                 AndroidUnityInterface.payProcessListener.onProcess(FunctionCalledListener.PAY_STATE_SERVICE_READY,result,null);
                 isPayServiceReady = true;
-                try {
-                    mHelper.querySkuDetailsAsync(mGotInventoryListener);
-                } catch (IabAsyncInProgressException e) {
-                    logPrint("GooglePay()... Another async operation in progress.");
-                }
+
+                initSkulist(skuJsons);
+                //querySkuOnwed();
             }
         });
-
-
     }
+
+
+    public void initSkulist(String jsonTxt){
+        //json传入需要查询的档位信息
+        logPrint("queryAllSkuDetails,mHelper=="+mHelper);
+        if(mHelper==null){
+            return;
+        }
+        mHelper.setSkuList(jsonTxt);
+        try {
+            logPrint("begin querySkuDetailsAsync...");
+            mHelper.querySkuDetailsAsync(mGotInventoryListener);
+        } catch (IabAsyncInProgressException e) {
+            logPrint("GooglePay()... Another async operation in progress.");
+        }
+    }
+
+    public void verifyPurchase(String goolgeOrder,String purchaseData,String signature){
+        boolean isVailid = com.googlepay.util.Security.verifyPurchase(base64EncodedPublicKey, purchaseData, signature);
+        logPrint("onConsumeFinished,successful..isVailid==" + isVailid);
+        ArrayList<String> skuDetailList = new ArrayList<String>();
+        skuDetailList.add(goolgeOrder+"|"+isVailid);
+        AndroidUnityInterface.serviceCallbackListenter.onServiceCallback(FunctionCalledListener.PAY_STATE_VERIFY_CONSUME,skuDetailList);
+    }
+
+
 
     public void querySkuOnwed(){
         logPrint("queryOwned,onClick...mHelper=="+mHelper);

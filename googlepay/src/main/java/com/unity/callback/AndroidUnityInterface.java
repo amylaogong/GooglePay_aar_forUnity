@@ -87,7 +87,42 @@ public class AndroidUnityInterface {
                     obj.put("getSignature",info.getSignature());
                     obj.put("getToken",info.getToken());
 
+
+                    String purchaseData = info.getOriginalJson();
+                    String signature = info.getSignature();
+                    boolean isVailid = com.googlepay.util.Security.verifyPurchase(GooglePay.base64EncodedPublicKey, purchaseData, signature);
+                    obj.put("purchase_isVailid",""+isVailid);
+
                     GooglePay.logPrint( "AndroidUnityInterface.java..paySuccessListener().returnUnity=="+obj.toString());
+                    NotifyUnityWithJson(obj.toString());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+
+    public static FunctionCalledListener.OnServiceCallbackListenter serviceCallbackListenter = new FunctionCalledListener.OnServiceCallbackListenter() {
+        @Override
+        public void onServiceCallback(int code, ArrayList<String> skuDetailList) {
+            GooglePay.logPrint( "AndroidUnityInterface.java..serviceCallbackListenter().code=="+code);
+            JSONObject obj;
+            try {
+                obj = new JSONObject();
+                obj.put("function","OnServiceCallBack");
+                obj.put("code",code);
+                if(skuDetailList!=null){
+                    if(code == FunctionCalledListener.PAY_STATE_QUERRY_SKU_DETAILS){
+                        int size = skuDetailList.size();
+                        obj.put("sku_detail_count",size);
+                        for(int i=0;i<size;i++){
+                            obj.put("sku_detail_"+i,skuDetailList.get(i));
+                        }
+                    }else if(code == FunctionCalledListener.PAY_STATE_VERIFY_CONSUME){
+                        obj.put("purchase_verify_info",skuDetailList.get(0));
+                    }
+                    GooglePay.logPrint( "AndroidUnityInterface.java..serviceCallbackListenter().returnUnity=="+obj.toString());
                     NotifyUnityWithJson(obj.toString());
                 }
             } catch (Exception e) {

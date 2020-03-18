@@ -65,10 +65,11 @@ public class MainActivity extends UnityPlayerActivity {
     }
 
 
-    public void InitPay(String googleKey)
+    public void InitPay(String googleKey,String jsonTxt)
     {
         GooglePay.logPrint( "MainActivity.java..InitPay().googleKey=="+googleKey);
         googlePublicKey = googleKey;
+        GooglePay.skuJsons = jsonTxt;
         getGooglePayInstance();
         GooglePay.logPrint( "MainActivity.java..InitPay().payInstance=="+payInstance);
     }
@@ -91,6 +92,30 @@ public class MainActivity extends UnityPlayerActivity {
             payInstance.querySkuOnwed();
         }
     }
+
+    public void ConsumedOwnedItem(){
+        GooglePay.logPrint( "00MainActivity.java..ConsumedOwnedItem()");
+        if(payInstance != null){
+            payInstance.consumedNextOwnedItem();
+        }
+    }
+
+    public void VerifyPurchase(String goolgeOrder,String purchaseData,String signature)
+    {
+        GooglePay.logPrint( "00MainActivity.java..VerifyPurchase()");
+        if(payInstance != null){
+            payInstance.verifyPurchase(goolgeOrder,purchaseData,signature);
+        }
+    }
+
+    public void QuerrySkuDetail(String jsonTxt)
+    {
+        GooglePay.logPrint( "00MainActivity.java..QuerrySkuDetail()");
+        if(payInstance != null){
+            payInstance.initSkulist(jsonTxt);
+        }
+    }
+
 
     public void DoLogin(String account,String passwd)
     {

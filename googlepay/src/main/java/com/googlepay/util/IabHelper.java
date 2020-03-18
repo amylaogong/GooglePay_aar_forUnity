@@ -172,6 +172,28 @@ public class IabHelper {
     public static final String GET_SKU_DETAILS_ITEM_TYPE_LIST = "ITEM_TYPE_LIST";
 
 
+    public static ArrayList<String> skuList = new ArrayList<String>();
+
+    public void setSkuList(String jsontxt){//
+        if(!mSetupDone){
+            return;
+        }
+        skuList.clear();
+        try {
+            JSONObject jsonResult = new JSONObject(jsontxt);
+            int count = jsonResult.getInt("google_sku_count");
+            for(int i=0;i<count;i++){
+                String key = "google_sku_index_"+i;
+                String value = jsonResult.getString(key);
+                skuList.add(value);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+
+    }
 
     /**
      * Creates an instance. After creation, it will not yet be ready to use. You must perform
@@ -651,6 +673,8 @@ public class IabHelper {
     }
 
     public Inventory querySkuOnwed()throws com.googlepay.util.IabException{
+        //find player owned items that not consumed...
+
         if(mInv==null){
             mInv = new com.googlepay.util.Inventory();
         }
@@ -822,15 +846,11 @@ public class IabHelper {
         logDebug("querySkuDetails,begin...");
         (new Thread(new Runnable(){
             public void run(){
-                ArrayList<String> skuList = new ArrayList<String>();
-                skuList.add("item_charge_1");
-                skuList.add("item_charge_2");
-                skuList.add("item_charge_30");
+
                 Bundle querySkus = new Bundle();
                 querySkus.putStringArrayList("ITEM_ID_LIST",skuList);
                 logDebug("querySkuDetails,begin...mService=="+mService);
                 String chargeType = "inapp";
-                String chargeSku = "";
 
                 try {
                     Bundle skuDetails = mService.getSkuDetails(3,mContext.getPackageName(),chargeType,querySkus);
@@ -838,23 +858,18 @@ public class IabHelper {
                     int response = skuDetails.getInt("RESPONSE_CODE");
                     logDebug("querySkuDetails,getSkuDetails,response=="+response);
                     if(response == 0){
+                        mSkuPriceMap.clear();
                         ArrayList<String> responseList = skuDetails.getStringArrayList("DETAILS_LIST");
+                        ArrayList<String> skuDetailList = new ArrayList<String>();
                         for(String thisRes:responseList){
                             JSONObject obj = new JSONObject(thisRes);
                             String sku = obj.getString("productId");
                             String price = obj.getString("price");
                             logDebug("querySkuDetails,getSkuDetails,(sku.price)=="+sku+","+price);
                             mSkuPriceMap.put(sku,price);
-                            chargeSku = sku;
+                            skuDetailList.add(sku+"|"+price);
                         }
-
-                        //then find player owned items that not consumed...
-
-                        try {
-                            querySkuOnwed();
-                        } catch (IabException e) {
-                            e.printStackTrace();
-                        }
+                        AndroidUnityInterface.serviceCallbackListenter.onServiceCallback(FunctionCalledListener.PAY_STATE_QUERRY_SKU_DETAILS,skuDetailList);
                     }
                 }catch (RemoteException e){
                     logDebug("querySkuDetails,getSkuDetails RemoteException_error,e=="+e.toString());
