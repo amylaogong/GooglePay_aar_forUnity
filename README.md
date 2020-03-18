@@ -142,26 +142,49 @@ public class IAPCallBackResult{
 	
 	public string getSku_6;//
 	
+	public int sku_detail_count = -1;//
+	
+	public string sku_detail_1;//id|price
+	
+	public string sku_detail_2;//
+	
+	public string sku_detail_3;//
+	
+	public string sku_detail_4;//
+	
+	public string sku_detail_5;//
+	
+	public string sku_detail_6;//
+
+	public string purchase_verify_info;//独立请求返回的结果，googleOrder|verifyState
+	
+	public string purchase_isVailid;//伴随订单回调的结果
+
 	
 }
 
 code取值：
 
 public enum IAP_PAY_STATE{
-
 	PAY_STATE_CONSUME_SUCCESS = 0,//消费成功
 	
+	PAY_STATE_QUERRY_OWNEDSKU_SUCCESS = 1,//获取拥有的未消耗物品
+	
+	PAY_STATE_QUERRY_SKU_DETAILS= 2,//获得商品详情，id和价格
+
 	PAY_STATE_SERVICE_INIT_FAILED = 1998,//初始化失败
 	
 	PAY_STATE_SERVICE_READY = 1999,//初始化完毕，服务准备完毕
 	
 	PAY_STATE_PROCESS_PURCHASE_CANCELLED=2001,//用户取消
 	
-	PAY_STATE_PROCESS_PURCHASE=2000,//purchase过程中，再根据IapHeper的状态码判断进度
+	PAY_STATE_PROCESS_PURCHASE=2000,////purchase过程中，再根据IapHeper的状态码判断进度
 	
 	PAY_STATE_PROCESS_PURCHASE_DONE=2002,//购买完成，purcahse over支付完成还未消耗
 	
-	PAY_STATE_PROCESS_CONSUME=3000//消费有了回调，然后判断是否成功，成功之后就调用另一个方法了OnCallBackPaySuccess
+	PAY_STATE_PROCESS_CONSUME=3000,//消费有了回调，然后判断是否成功，成功之后就调用另一个方法了OnCallBackPaySuccess
+	
+	PAY_STATE_VERIFY_CONSUME= 3001 // verify data
 	
 }
 
@@ -177,8 +200,11 @@ OnCallBackQuerryOwnedSku，查询google服务器上拥有的未消耗的物品
 
 SetCache，设置字典映射，json中包含key，value字段
 
+ConsumedOwnedItem，消耗拥有的物品
 
+QuerrySkuDetail，获取商品详情，id和价格，目前有问题，错误码返回5
 
+VerifyPurchase，验证订单
 
 
 ==================================================================================================
@@ -302,6 +328,49 @@ public class AndroidInterface : MonoBehaviour {
 		mainActivity = jc.GetStatic<AndroidJavaObject>("currentActivity");
 
 		mainActivity.Call("QuerySkuOnwed");
+	}
+	
+	
+	public static void ConsumedOwnedItem()
+	{
+		LogView.setViewText ("AndroidInterface.cs,ConsumedOwnedItem,Unity call Java...ConsumedOwnedItem");
+
+		AndroidJavaClass jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+		
+		mainActivity = jc.GetStatic<AndroidJavaObject>("currentActivity");
+
+		mainActivity.Call("ConsumedOwnedItem");
+		
+	}
+
+	public static void VerifyPurchase(string goolgeOrder,string purchaseData,string signature)
+	{
+		LogView.setViewText ("AndroidInterface.cs,VerifyPurchase,Unity call Java...VerifyPurchase");
+
+		AndroidJavaClass jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+		
+		mainActivity = jc.GetStatic<AndroidJavaObject>("currentActivity");
+
+		mainActivity.Call("VerifyPurchase",goolgeOrder,purchaseData,signature);
+		
+	}
+
+	public static void QuerrySkuDetail()
+	{
+		LogView.setViewText ("AndroidInterface.cs,QuerrySkuDetail,Unity call Java...QuerrySkuDetail");
+
+		AndroidJavaClass jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+		
+		mainActivity = jc.GetStatic<AndroidJavaObject>("currentActivity");
+
+		IAP_SKU_ID_JSON skuObj = new IAP_SKU_ID_JSON ();
+		
+		string skuJson = JsonUtility.ToJson(skuObj);
+		
+		LogView.setViewText ("AndroidInterface.cs,QuerrySkuDetail,Unity call Java...QuerrySkuDetail,skuJson=="+skuJson);
+		
+		mainActivity.Call("QuerrySkuDetail",skuJson);
+		
 	}
 	
 
