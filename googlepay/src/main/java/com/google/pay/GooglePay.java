@@ -23,10 +23,16 @@ public class GooglePay {
     public static boolean isUse = true;
     private int requestCode = 10020;
     public static boolean logSwitch = true;
-    private boolean isPayServiceReady = false;
+    public boolean isPayServiceReady = false;
 
     public static String gameOrderId = "";//游戏里自定义订单号，由服务器生成
-    public static String skuJsons = "";
+    public static String skuJsons = "";//初始化档位的完整json
+    public static String curProductId = "";//当前购买的物品档位id
+
+    public static int payProgressCode = -1;//支付过程中，代表进度的状态码，与FunctionCalledListener状态码对应
+    public static int payProgressCode_lastTime = -1;//上次的状态码，验证是否变化了
+
+    public static long beginTime = 0;//System.currentTimeMillis() - startTime
 
     public IabHelper mHelper = null;
     // Listener that's called when we finish querying the items and subscriptions we own
@@ -166,6 +172,8 @@ public class GooglePay {
         // enable debug logging (for a production application, you should set this to false).
         mHelper.enableDebugLogging(true);
 
+        GooglePay.payProgressCode = -1;
+        payProgressCode_lastTime = payProgressCode;
         // Start setup. This is asynchronous and the specified listener
         // will be called once setup completes.
         logPrint( "GooglePay()..Starting setup.");
@@ -184,10 +192,12 @@ public class GooglePay {
                 }
 
 
-                AndroidUnityInterface.payProcessListener.onProcess(FunctionCalledListener.PAY_STATE_SERVICE_READY,result,null);
+
                 isPayServiceReady = true;
 
                 initSkulist(skuJsons);
+                AndroidUnityInterface.payProcessListener.onProcess(FunctionCalledListener.PAY_STATE_SERVICE_READY,result,null);
+
                 //querySkuOnwed();
             }
         });
@@ -196,7 +206,8 @@ public class GooglePay {
 
     public void initSkulist(String jsonTxt){
         //json传入需要查询的档位信息
-        logPrint("queryAllSkuDetails,mHelper=="+mHelper);
+        logPrint("initSkulist,mHelper=="+mHelper);
+        logPrint("initSkulist,jsonTxt=="+jsonTxt);
         if(mHelper==null){
             return;
         }
@@ -209,7 +220,7 @@ public class GooglePay {
         }
     }
 
-    public void verifyPurchase(String goolgeOrder,String purchaseData,String signature){
+    public static void verifyPurchase(String goolgeOrder,String purchaseData,String signature){
         boolean isVailid = com.googlepay.util.Security.verifyPurchase(base64EncodedPublicKey, purchaseData, signature);
         logPrint("onConsumeFinished,successful..isVailid==" + isVailid);
         ArrayList<String> skuDetailList = new ArrayList<String>();
@@ -232,6 +243,7 @@ public class GooglePay {
     }
 
     public void buyItemBySku(String sku){
+        beginTime = System.currentTimeMillis();
         logPrint("buyItemBySku,onClick...sku=="+sku);
         if(mHelper==null){
             return;

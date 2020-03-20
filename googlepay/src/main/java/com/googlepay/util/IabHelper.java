@@ -182,10 +182,15 @@ public class IabHelper {
         try {
             JSONObject jsonResult = new JSONObject(jsontxt);
             int count = jsonResult.getInt("google_sku_count");
-            for(int i=0;i<count;i++){
+
+            GooglePay.logPrint( "IabHelper.java...setSkuList,count=="+count);
+
+            for(int i=1;i<=count;i++){
                 String key = "google_sku_index_"+i;
                 String value = jsonResult.getString(key);
-                skuList.add(value);
+                if(!value.equals("")){
+                    skuList.add(value);
+                }
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -846,7 +851,7 @@ public class IabHelper {
         logDebug("querySkuDetails,begin...");
         (new Thread(new Runnable(){
             public void run(){
-
+                logDebug("querySkuDetails,getSkuDetails,skuList_size=="+skuList.size());
                 Bundle querySkus = new Bundle();
                 querySkus.putStringArrayList("ITEM_ID_LIST",skuList);
                 logDebug("querySkuDetails,begin...mService=="+mService);

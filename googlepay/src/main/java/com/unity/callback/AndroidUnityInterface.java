@@ -35,6 +35,7 @@ public class AndroidUnityInterface {
     public static FunctionCalledListener.OnPayProcessListener payProcessListener = new FunctionCalledListener.OnPayProcessListener() {
         @Override
         public void onProcess(int code, IabResult result, Purchase info) {
+            GooglePay.payProgressCode = code;
             JSONObject obj;
             try {
                 obj = new JSONObject();
@@ -68,6 +69,7 @@ public class AndroidUnityInterface {
     public static FunctionCalledListener.OnPaySuccessListener paySuccessListener = new FunctionCalledListener.OnPaySuccessListener() {
         @Override
         public void onSuccess(int code, Purchase info) {
+            GooglePay.payProgressCode = code;
             GooglePay.logPrint( "AndroidUnityInterface.java..paySuccessListener().info=="+info);
             JSONObject obj;
             try {
@@ -95,6 +97,12 @@ public class AndroidUnityInterface {
 
                     GooglePay.logPrint( "AndroidUnityInterface.java..paySuccessListener().returnUnity=="+obj.toString());
                     NotifyUnityWithJson(obj.toString());
+
+                    MainActivity.mainActivity.SetOperation(true);
+
+                    GooglePay.logPrint( "AndroidUnityInterface.java..paySuccessListener().currentTimeMillis=="+System.currentTimeMillis());
+                    GooglePay.logPrint( "AndroidUnityInterface.java..paySuccessListener().totle_time=="+(System.currentTimeMillis()-GooglePay.beginTime));
+
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -107,6 +115,7 @@ public class AndroidUnityInterface {
         @Override
         public void onServiceCallback(int code, ArrayList<String> skuDetailList) {
             GooglePay.logPrint( "AndroidUnityInterface.java..serviceCallbackListenter().code=="+code);
+            GooglePay.payProgressCode = code;
             JSONObject obj;
             try {
                 obj = new JSONObject();
@@ -135,6 +144,7 @@ public class AndroidUnityInterface {
         @Override
         public void onQuerryOwnedSku(int code, ArrayList<String> ownedSkus) {
             GooglePay.logPrint( "AndroidUnityInterface.java..querryOwnedSkuListener().code=="+code);
+            GooglePay.payProgressCode = code;
             JSONObject obj;
             try {
                 obj = new JSONObject();

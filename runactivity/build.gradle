@@ -15,7 +15,7 @@ android {
         applicationId "com.ourgame.test.charge"
         minSdkVersion 18
         targetSdkVersion 26
-        versionCode 13
+        versionCode 15
         versionName "6.00.03"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
